@@ -3,10 +3,9 @@ package com.quinny898.library.persistentsearch;
 import io.codetail.animation.ReverseInterpolator;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
-import java.util.ArrayList;
 
-import com.balysv.materialmenu.MaterialMenuView;
-import com.balysv.materialmenu.MaterialMenuDrawable.IconState;
+import java.util.ArrayList;
+import java.util.Locale;
 
 import android.animation.LayoutTransition;
 import android.app.Activity;
@@ -43,6 +42,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.balysv.materialmenu.MaterialMenuDrawable.IconState;
+import com.balysv.materialmenu.MaterialMenuView;
+
 public class SearchBox extends RelativeLayout {
 
 	private MaterialMenuView materialMenu;
@@ -60,7 +62,7 @@ public class SearchBox extends RelativeLayout {
 	private SearchListener listener;
 	private MenuListener menuListener;
 	private FrameLayout rootLayout;
-	private String logoText;
+	private CharSequence logoText;
 	private ProgressBar pb;
 	private ArrayList<SearchResult> initialResults;
 	private boolean searchWithoutSuggestions = true;
@@ -152,7 +154,7 @@ public class SearchBox extends RelativeLayout {
 				return false;
 			}
 		});
-		logoText = "Logo";
+		logoText = "";
 	}
 	
 	/***
@@ -303,8 +305,8 @@ public class SearchBox extends RelativeLayout {
 		resultList.clear();
 		int count = 0;
 		for (int x = 0; x < searchables.size(); x++) {
-			if (searchables.get(x).title.toLowerCase().startsWith(
-					getSearchText().toLowerCase())
+			if (searchables.get(x).toString().toLowerCase(Locale.getDefault()).contains(
+					getSearchText().toLowerCase(Locale.getDefault()))
 					&& count < 5) {
 				addResult(searchables.get(x));
 				count++;
@@ -373,7 +375,7 @@ public class SearchBox extends RelativeLayout {
 	 * Set the text of the logo (default text when closed)
 	 * @param text
 	 */
-	public void setLogoText(String text) {
+	public void setLogoText(CharSequence text) {
 		this.logoText = text;
 		setLogoTextInt(text);
 	}
@@ -390,7 +392,7 @@ public class SearchBox extends RelativeLayout {
 	 * Set the searchbox's current text manually
 	 * @param text
 	 */
-	public void setSearchString(String text) {
+	public void setSearchString(CharSequence text) {
 		search.setText(text);
 	}
 	
@@ -483,7 +485,7 @@ public class SearchBox extends RelativeLayout {
 		SupportAnimator animator = ViewAnimationUtils.createCircularReveal(
 				root, cx, cy, 0, finalRadius);
 		animator.setInterpolator(new AccelerateDecelerateInterpolator());
-		animator.setDuration(500);
+		animator.setDuration(300);
 		animator.addListener(new SupportAnimator.AnimatorListener(){
 
 			@Override
@@ -516,7 +518,7 @@ public class SearchBox extends RelativeLayout {
 		if (!TextUtils.isEmpty(getSearchText())) {
 			setLogoTextInt(result.title);
 			if (listener != null)
-				listener.onSearch(result.title);
+				listener.onSearch(result);
 		} else {
 			setLogoTextInt(logoText);
 		}
@@ -537,6 +539,7 @@ public class SearchBox extends RelativeLayout {
 		results.setAdapter(new SearchAdapter(context, resultList));
 		search.addTextChangedListener(new TextWatcher() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void afterTextChanged(Editable s) {
 				if (s.length() > 0) {
@@ -647,7 +650,7 @@ public class SearchBox extends RelativeLayout {
 
 	
 
-	private void setLogoTextInt(String text) {
+	private void setLogoTextInt(CharSequence text) {
 		logo.setText(text);
 	}
 
@@ -740,7 +743,7 @@ public class SearchBox extends RelativeLayout {
 		 * Called when a search happens, with a result
 		 * @param result
 		 */
-		public void onSearch(String result);
+		public void onSearch(SearchResult result);
 	}
 
 	public interface MenuListener {
